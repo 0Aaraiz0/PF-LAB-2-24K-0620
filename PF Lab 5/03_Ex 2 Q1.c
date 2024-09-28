@@ -6,7 +6,6 @@ int main() {
     printf("Enter a number: ");
     scanf("%d", &a);
 
-    // Calculate remainder after reading the input
     b = a % 3;
     c = a % 5;
 
