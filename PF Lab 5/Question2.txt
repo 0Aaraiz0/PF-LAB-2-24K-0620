@@ -1,0 +1,14 @@
+#include <stdio.h>
+int main(){
+
+int a, sum;
+printf("Write a number : ");
+scanf("%d", &a);
+
+while(a > 0){
+    sum = sum + a%10;
+    a = a/10;
+}
+printf("%d is your sum", sum);
+return 0;
+}
