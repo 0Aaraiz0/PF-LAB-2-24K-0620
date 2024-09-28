@@ -10,6 +10,6 @@ int main() {
         sum = sum + a % 10;
         a = a / 10;
     }
- printf("%d is your sum\n", sum);
+ printf("Your sum is %d\n", sum);
      return 0;
      }
