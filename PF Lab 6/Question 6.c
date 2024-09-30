@@ -1,6 +1,6 @@
 #include <stdio.h>
 int main(){
-int n = 1 , sum = 0;
+int n = 0 , sum = 0;
 
 for( int a = 1 , b = 2 ; n < 7 ; n = n + 1)
 {
