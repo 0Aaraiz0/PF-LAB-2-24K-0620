@@ -3,7 +3,7 @@ int main(){
 int n;
 printf("Enter a Num : ");
 scanf("%d", & n);
-while (n > 10 )
+while (n > 9 )
 {
     printf("%d is a multiple digit number\n", n);
     printf("Enter a Num : ");
