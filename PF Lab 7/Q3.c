@@ -1,32 +1,37 @@
 #include <stdio.h>
-int main(){
-    int counta, countb, a ,max = 0, min = 1000000 ;
 
-    printf("How many positive numbers you want to enter (smaller than 1000000 ) : ");
+int main() {
+    int a;
+
+    printf("How many numbers do you want to enter: ");
     scanf("%d", &a);
+
+    if (a <= 0) {
+        printf("Error: You must enter a positive number of elements.\n");
+        return 1;
+    }
 
     int arr[a];
 
-    for(int i = 0; i < a; i++){
-        printf("Enter the number : ");
+    for (int i = 0; i < a; i++) {
+        printf("Enter number %d: ", i + 1);
         scanf("%d", &arr[i]);
     }
 
-    for(int d = 0; d<a; d++){
+    int max = arr[0];
+    int min = arr[0];
 
-        if(arr[d]>max){
+    for (int d = 1; d < a; d++) {
+        if (arr[d] > max) {
             max = arr[d];
         }
-    }
-
-    for(int e = 0; e<a; e++){
-
-        if(arr[e] < min){
-            min = arr[e];
+        if (arr[d] < min) {
+            min = arr[d];
         }
     }
-printf("Maximum is %d\n", max);
-printf("Min is %d", min);
 
-return 0;
+    printf("Maximum is %d\n", max);
+    printf("Minimum is %d\n", min);
+
+    return 0;
 }
