@@ -14,22 +14,21 @@ struct bowl {
 };
 
 struct bat {
-    char type[10];   
+    char type[10];  
     char handed[8]; 
-    struct bowl ply2; 
+    struct bowl ply2;
 };
 
-void createPlayer(FILE *file);
-void readPlayers(FILE *file);
-void updatePlayer(FILE *file);
-void deletePlayer(FILE *file);
+void createPlayer();
+void readPlayers();
+void updatePlayer();
+void deletePlayer();
 
 int main() {
-    FILE *file;
     int choice;
 
     while (1) {
-        printf("\n--- Player Management System ---\n");
+        printf("\n--- Cricket Player Management System ---\n");
         printf("1. Add Player\n");
         printf("2. View Players\n");
         printf("3. Update Player\n");
@@ -37,37 +36,20 @@ int main() {
         printf("5. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
+        getchar(); 
 
         switch (choice) {
             case 1:
-                file = fopen("players.dat", "ab");
-                if (!file) {
-                    perror("File opening failed");
-                    return 1;
-                }
-                createPlayer(file);
-                fclose(file);
+                createPlayer();
                 break;
             case 2:
-                file = fopen("players.dat", "rb");
-                if (!file) {
-                    perror("File opening failed");
-                    return 1;
-                }
-                readPlayers(file);
-                fclose(file);
+                readPlayers();
                 break;
             case 3:
-                file = fopen("players.dat", "rb+");
-                if (!file) {
-                    perror("File opening failed");
-                    return 1;
-                }
-                updatePlayer(file);
-                fclose(file);
+                updatePlayer();
                 break;
             case 4:
-                deletePlayer(file);
+                deletePlayer();
                 break;
             case 5:
                 printf("Exiting...\n");
@@ -79,42 +61,60 @@ int main() {
     return 0;
 }
 
-void createPlayer(FILE *file) {
+void createPlayer() {
+    FILE *file = fopen("players.txt", "a");
+    if (!file) {
+        perror("File opening failed");
+        return;
+    }
+
     struct bat playerData;
 
     printf("Enter player name: ");
-    fgets(playerData.ply2.ply.name, 20, stdin);
-    strtok(playerData.ply2.ply.name, "\n"); 
+    fgets(playerData.ply2.ply.name, sizeof(playerData.ply2.ply.name), stdin);
+    strtok(playerData.ply2.ply.name, "\n");
 
     printf("Enter team name: ");
-    fgets(playerData.ply2.ply.team, 20, stdin);
+    fgets(playerData.ply2.ply.team, sizeof(playerData.ply2.ply.team), stdin);
     strtok(playerData.ply2.ply.team, "\n");
 
     printf("Enter bowler type (seemer/pacer/spinner or N/A): ");
-    fgets(playerData.ply2.type, 10, stdin);
+    fgets(playerData.ply2.type, sizeof(playerData.ply2.type), stdin);
     strtok(playerData.ply2.type, "\n");
 
     printf("Enter bowler arm (left/right): ");
-    fgets(playerData.ply2.arm, 5, stdin);
+    fgets(playerData.ply2.arm, sizeof(playerData.ply2.arm), stdin);
     strtok(playerData.ply2.arm, "\n");
 
     printf("Enter batter type (top/middle/lower order): ");
-    fgets(playerData.type, 10, stdin);
+    fgets(playerData.type, sizeof(playerData.type), stdin);
     strtok(playerData.type, "\n");
 
     printf("Enter batter handedness (lefty/righty): ");
-    fgets(playerData.handed, 8, stdin);
+    fgets(playerData.handed, sizeof(playerData.handed), stdin);
     strtok(playerData.handed, "\n");
 
-    fwrite(&playerData, sizeof(struct bat), 1, file);
+    fprintf(file, "%s,%s,%s,%s,%s,%s\n", playerData.ply2.ply.name, playerData.ply2.ply.team,
+            playerData.ply2.type, playerData.ply2.arm,
+            playerData.type, playerData.handed);
+
     printf("Player added successfully!\n");
+    fclose(file);
 }
 
-void readPlayers(FILE *file) {
-    struct bat playerData;
+void readPlayers() {
+    FILE *file = fopen("players.txt", "r");
+    if (!file) {
+        perror("File opening failed");
+        return;
+    }
 
+    struct bat playerData;
     printf("\n--- Player List ---\n");
-    while (fread(&playerData, sizeof(struct bat), 1, file)) {
+    while (fscanf(file, "%[^,],%[^,],%[^,],%[^,],%[^,],%[^\n]\n",
+                  playerData.ply2.ply.name, playerData.ply2.ply.team,
+                  playerData.ply2.type, playerData.ply2.arm,
+                  playerData.type, playerData.handed) != EOF) {
         printf("\nName: %s\n", playerData.ply2.ply.name);
         printf("Team: %s\n", playerData.ply2.ply.team);
         printf("Bowler Type: %s\n", playerData.ply2.type);
@@ -122,88 +122,110 @@ void readPlayers(FILE *file) {
         printf("Batter Type: %s\n", playerData.type);
         printf("Batter Handedness: %s\n", playerData.handed);
     }
+
+    fclose(file);
 }
 
-void updatePlayer(FILE *file) {
+void updatePlayer() {
+    FILE *file = fopen("players.txt", "r");
+    FILE *tempFile = fopen("temp.txt", "w");
+    if (!file || !tempFile) {
+        perror("File opening failed");
+        return;
+    }
+
     struct bat playerData;
     char searchName[20];
     int found = 0;
 
     printf("Enter the name of the player to update: ");
-    fgets(searchName, 20, stdin);
+    fgets(searchName, sizeof(searchName), stdin);
     strtok(searchName, "\n");
 
-    while (fread(&playerData, sizeof(struct bat), 1, file)) {
+    while (fscanf(file, "%[^,],%[^,],%[^,],%[^,],%[^,],%[^\n]\n",
+                  playerData.ply2.ply.name, playerData.ply2.ply.team,
+                  playerData.ply2.type, playerData.ply2.arm,
+                  playerData.type, playerData.handed) != EOF) {
         if (strcmp(playerData.ply2.ply.name, searchName) == 0) {
             found = 1;
+
             printf("Enter new team name: ");
-            fgets(playerData.ply2.ply.team, 20, stdin);
+            fgets(playerData.ply2.ply.team, sizeof(playerData.ply2.ply.team), stdin);
             strtok(playerData.ply2.ply.team, "\n");
 
             printf("Enter new bowler type: ");
-            fgets(playerData.ply2.type, 10, stdin);
+            fgets(playerData.ply2.type, sizeof(playerData.ply2.type), stdin);
             strtok(playerData.ply2.type, "\n");
 
             printf("Enter new bowler arm: ");
-            fgets(playerData.ply2.arm, 5, stdin);
+            fgets(playerData.ply2.arm, sizeof(playerData.ply2.arm), stdin);
             strtok(playerData.ply2.arm, "\n");
 
             printf("Enter new batter type: ");
-            fgets(playerData.type, 10, stdin);
+            fgets(playerData.type, sizeof(playerData.type), stdin);
             strtok(playerData.type, "\n");
 
             printf("Enter new batter handedness: ");
-            fgets(playerData.handed, 8, stdin);
+            fgets(playerData.handed, sizeof(playerData.handed), stdin);
             strtok(playerData.handed, "\n");
-
-            fseek(file, -sizeof(struct bat), SEEK_CUR);
-            fwrite(&playerData, sizeof(struct bat), 1, file);
-            printf("Player updated successfully!\n");
-            break;
         }
-    }
-    if (!found) {
-        printf("Player not found.\n");
-    }
-}
 
-void deletePlayer(FILE *file) {
-    struct bat playerData;
-    FILE *tempFile = fopen("temp.dat", "wb");
-    char searchName[20];
-    int found = 0;
-
-    if (!tempFile) {
-        perror("Temporary file creation failed");
-        return;
+        fprintf(tempFile, "%s,%s,%s,%s,%s,%s\n", playerData.ply2.ply.name, playerData.ply2.ply.team,
+                playerData.ply2.type, playerData.ply2.arm,
+                playerData.type, playerData.handed);
     }
 
-    file = fopen("players.dat", "rb");
-    if (!file) {
-        perror("File opening failed");
-        return;
-    }
-
-    printf("Enter the name of the player to delete: ");
-    fgets(searchName, 20, stdin);
-    strtok(searchName, "\n");
-
-    while (fread(&playerData, sizeof(struct bat), 1, file)) {
-        if (strcmp(playerData.ply2.ply.name, searchName) != 0) {
-            fwrite(&playerData, sizeof(struct bat), 1, tempFile);
-        } else {
-            found = 1;
-        }
-    }
     fclose(file);
     fclose(tempFile);
 
     if (found) {
-        remove("players.dat");
-        rename("temp.dat", "players.dat");
+        remove("players.txt");
+        rename("temp.txt", "players.txt");
+        printf("Player updated successfully!\n");
+    } else {
+        remove("temp.txt");
+        printf("Player not found.\n");
+    }
+}
+
+void deletePlayer() {
+    FILE *file = fopen("players.txt", "r");
+    FILE *tempFile = fopen("temp.txt", "w");
+    if (!file || !tempFile) {
+        perror("File opening failed");
+        return;
+    }
+
+    struct bat playerData;
+    char searchName[20];
+    int found = 0;
+
+    printf("Enter the name of the player to delete: ");
+    fgets(searchName, sizeof(searchName), stdin);
+    strtok(searchName, "\n");
+
+    while (fscanf(file, "%[^,],%[^,],%[^,],%[^,],%[^,],%[^\n]\n",
+                  playerData.ply2.ply.name, playerData.ply2.ply.team,
+                  playerData.ply2.type, playerData.ply2.arm,
+                  playerData.type, playerData.handed) != EOF) {
+        if (strcmp(playerData.ply2.ply.name, searchName) != 0) {
+            fprintf(tempFile, "%s,%s,%s,%s,%s,%s\n", playerData.ply2.ply.name, playerData.ply2.ply.team,
+                    playerData.ply2.type, playerData.ply2.arm,
+                    playerData.type, playerData.handed);
+        } else {
+            found = 1;
+        }
+    }
+
+    fclose(file);
+    fclose(tempFile);
+
+    if (found) {
+        remove("players.txt");
+        rename("temp.txt", "players.txt");
         printf("Player deleted successfully!\n");
     } else {
-        remove("temp.dat");
+        remove("temp.txt");
         printf("Player not found.\n");
     }
 }
